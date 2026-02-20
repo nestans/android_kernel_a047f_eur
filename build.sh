@@ -2,16 +2,16 @@
 
 export RDIR="$(pwd)"
 export ARCH=arm64
-export KBUILD_BUILD_USER="@ravindu644"
+export KBUILD_BUILD_USER="nestan"
 export PLATFORM_VERSION=12
 export ANDROID_MAJOR_VERSION=s
 
 # Install requirements
 if [ ! -f ".requirements" ]; then
-    sudo apt update && sudo apt install -y git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full android-sdk-libsparse-utils erofs-utils \
-        default-jdk git gnupg flex bison gperf build-essential zip curl libc6-dev libncurses-dev libx11-dev libreadline-dev libgl1 libgl1-mesa-dev \
-        python3 make sudo gcc g++ bc grep tofrodos python3-markdown libxml2-utils xsltproc zlib1g-dev python-is-python3 libc6-dev libtinfo6 \
-        make repo cpio kmod openssl libelf-dev pahole libssl-dev --fix-missing && wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb && sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb && touch .requirements
+  sudo apt update && sudo apt install -y git device-tree-compiler lz4 xz-utils zlib1g-dev openjdk-17-jdk gcc g++ python3 python-is-python3 p7zip-full android-sdk-libsparse-utils erofs-utils \
+    default-jdk git gnupg flex bison gperf build-essential zip curl libc6-dev libncurses-dev libx11-dev libreadline-dev libgl1 libgl1-mesa-dev \
+    python3 make sudo gcc g++ bc grep tofrodos python3-markdown libxml2-utils xsltproc zlib1g-dev python-is-python3 libc6-dev libtinfo6 \
+    make repo cpio kmod openssl libelf-dev pahole libssl-dev --fix-missing && wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb && sudo dpkg -i libtinfo5_6.3-2ubuntu0.1_amd64.deb && touch .requirements
 fi
 
 export BUILD_CROSS_COMPILE="${RDIR}/toolchain/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/bin/aarch64-linux-android-"
@@ -22,23 +22,23 @@ git submodule init && git submodule update
 
 #output dir
 if [ ! -d "${RDIR}/out" ]; then
-    mkdir -p "${RDIR}/out"
+  mkdir -p "${RDIR}/out"
 fi
 
 #build dir
 if [ ! -d "${RDIR}/build" ]; then
-    mkdir -p "${RDIR}/build"
+  mkdir -p "${RDIR}/build"
 else
-    rm -rf "${RDIR}/build" && mkdir -p "${RDIR}/build"
+  rm -rf "${RDIR}/build" && mkdir -p "${RDIR}/build"
 fi
 
 #kernelversion
 if [ -z "$BUILD_KERNEL_VERSION" ]; then
-    export BUILD_KERNEL_VERSION="dev"
+  export BUILD_KERNEL_VERSION="dev"
 fi
 
 #setting up localversion
-echo -e "CONFIG_LOCALVERSION_AUTO=n\nCONFIG_LOCALVERSION=\"-ravindu644-${BUILD_KERNEL_VERSION}\"\n" > "${RDIR}/arch/arm64/configs/version.config"
+echo -e "CONFIG_LOCALVERSION_AUTO=n\nCONFIG_LOCALVERSION=\"-nestan-${BUILD_KERNEL_VERSION}\"\n" >"${RDIR}/arch/arm64/configs/version.config"
 
 #build options
 export ARGS="
@@ -52,25 +52,25 @@ CC=${BUILD_CC} \
 "
 
 #build kernel image
-build_kernel(){
-    make ${ARGS} exynos850-a04sxx_defconfig a04s.config version.config
-    make ${ARGS} menuconfig
-    make ${ARGS} || exit 1
+build_kernel() {
+  make ${ARGS} exynos850-a04sxx_defconfig a04s.config version.config
+  make ${ARGS} menuconfig
+  make ${ARGS} || exit 1
 }
 
 #build boot.img
-build_boot() {    
-    rm -f ${RDIR}/AIK-Linux/split_img/boot.img-kernel ${RDIR}/AIK-Linux/boot.img
-    cp "${RDIR}/out/arch/arm64/boot/Image" ${RDIR}/AIK-Linux/split_img/boot.img-kernel
-    mkdir -p ${RDIR}/AIK-Linux/ramdisk/{debug_ramdisk,dev,metadata,mnt,proc,second_stage_resources,sys}
-    cd ${RDIR}/AIK-Linux && ./repackimg.sh --nosudo && mv image-new.img ${RDIR}/build/boot.img
+build_boot() {
+  rm -f ${RDIR}/AIK-Linux/split_img/boot.img-kernel ${RDIR}/AIK-Linux/boot.img
+  cp "${RDIR}/out/arch/arm64/boot/Image" ${RDIR}/AIK-Linux/split_img/boot.img-kernel
+  mkdir -p ${RDIR}/AIK-Linux/ramdisk/{debug_ramdisk,dev,metadata,mnt,proc,second_stage_resources,sys}
+  cd ${RDIR}/AIK-Linux && ./repackimg.sh --nosudo && mv image-new.img ${RDIR}/build/boot.img
 }
 
 #build odin flashable tar
-build_tar(){
-    cd ${RDIR}/build
-    tar -cvf "KernelSU-Next-SM-A047F-${BUILD_KERNEL_VERSION}.tar" boot.img && rm boot.img
-    echo -e "\n[i] Build Finished..!\n" && cd ${RDIR}
+build_tar() {
+  cd ${RDIR}/build
+  tar -cvf "KernelSU-Next-SM-A047F-${BUILD_KERNEL_VERSION}.tar" boot.img && rm boot.img
+  echo -e "\n[i] Build Finished..!\n" && cd ${RDIR}
 }
 
 build_kernel
